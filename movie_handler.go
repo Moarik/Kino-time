@@ -1,0 +1,73 @@
+package controller
+
+import (
+	"log/slog"
+	"net/http"
+	"strconv" // Добавьте импорт strconv для конвертации строки в int
+
+	"kinotime/internal/model"
+	"kinotime/internal/types"
+
+	"github.com/gin-gonic/gin"
+)
+
+type MovieHandler struct {
+	MovieRepo *model.MovieRepository
+}
+
+func NewMovieHandler(repo *model.MovieRepository) *MovieHandler {
+	return &MovieHandler{MovieRepo: repo}
+}
+
+func (h *MovieHandler) HandleCreateMovie(c *gin.Context) {
+	var movie types.Movie
+	if err := c.ShouldBindJSON(&movie); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		slog.Error(err.Error())
+		return
+	}
+
+	err := h.MovieRepo.CreateMovie(c, movie.Title, movie.Genre, movie.Description)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create movie"})
+		slog.Error(err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Movie created successfully",
+	})
+}
+
+func (h *MovieHandler) HandleGetMovieByID(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid movie ID"})
+		return
+	}
+
+	movie, err := h.MovieRepo.GetMovieByID(c, id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Movie not found"})
+		slog.Error(err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"movie": movie,
+	})
+}
+
+func (h *MovieHandler) HandleGetAllMovies(c *gin.Context) {
+	movies, err := h.MovieRepo.GetAllMovies(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch movies"})
+		slog.Error(err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"movies": movies,
+	})
+}
