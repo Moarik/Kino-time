@@ -47,3 +47,13 @@ func (repo *MovieRepository) GetAllMovies(ctx context.Context) ([]types.Movie, e
 	}
 	return movies, nil
 }
+
+func (repo *MovieRepository) UpdateMovie(ctx context.Context, id int, title, genre, description string) error {
+	_, err := repo.DB.ExecContext(ctx, "UPDATE movies SET title = $1, genre = $2, description = $3 WHERE id = $4", title, genre, description, id)
+	return err
+}
+
+func (repo *MovieRepository) DeleteMovie(ctx context.Context, id int) error {
+	_, err := repo.DB.ExecContext(ctx, "DELETE FROM movies WHERE id = $1", id)
+	return err
+}

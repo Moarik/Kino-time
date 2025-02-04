@@ -3,7 +3,7 @@ package controller
 import (
 	"log/slog"
 	"net/http"
-	"strconv" // Добавьте импорт strconv для конвертации строки в int
+	"strconv"
 
 	"kinotime/internal/model"
 	"kinotime/internal/types"
@@ -69,5 +69,52 @@ func (h *MovieHandler) HandleGetAllMovies(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"movies": movies,
+	})
+}
+
+func (h *MovieHandler) HandleUpdateMovie(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid movie ID"})
+		return
+	}
+
+	var movie types.Movie
+	if err := c.ShouldBindJSON(&movie); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		slog.Error(err.Error())
+		return
+	}
+
+	err = h.MovieRepo.UpdateMovie(c, id, movie.Title, movie.Genre, movie.Description)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update movie"})
+		slog.Error(err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Movie updated successfully",
+	})
+}
+
+func (h *MovieHandler) HandleDeleteMovie(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid movie ID"})
+		return
+	}
+
+	err = h.MovieRepo.DeleteMovie(c, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete movie"})
+		slog.Error(err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Movie deleted successfully",
 	})
 }
