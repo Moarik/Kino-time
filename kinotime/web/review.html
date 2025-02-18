@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Reviews - {{.MovieTitle}}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #2e2e2e;
+            color: #f0f0f0;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            width: 100%;
+            padding: 15px 0;
+            background-color: #3e3e3e;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-align: center;
+            color: #f9f9f9;
+        }
+
+        .reviews-container {
+            margin-bottom: 40px;
+        }
+
+        .review {
+            background-color: #3e3e3e;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .rating {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+
+        .review-body {
+            margin-bottom: 15px;
+        }
+
+        .review-footer {
+            font-size: 0.85rem;
+            color: #aaa;
+            text-align: right;
+        }
+
+        .review-form {
+            background-color: #3e3e3e;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-title {
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #f9f9f9;
+        }
+
+        .form-control {
+            background-color: #2e2e2e;
+            border: 1px solid #555;
+            color: #f0f0f0;
+            margin-bottom: 15px;
+        }
+
+        .form-control:focus {
+            background-color: #3a3a3a;
+            color: #f0f0f0;
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+
+        .form-label {
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #aaa;
+        }
+
+        .login-message {
+            text-align: center;
+            padding: 20px;
+            background-color: #3e3e3e;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+
+        .nav-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">KinoTime</h3>
+            {{if .IsAuthenticated}}
+            <div class="d-flex align-items-center">
+                <span class="me-3">Hello, {{if .Username}}{{.Username}}{{else}}User{{end}}!</span>
+                <a href="/front/logout" class="btn btn-outline-light btn-sm">Logout</a>
+            </div>
+            {{else}}
+            <div>
+                <a href="/front/login" class="btn btn-outline-light btn-sm me-2">Login</a>
+                <a href="/front/register" class="btn btn-primary btn-sm">Register</a>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</header>
+
+<div class="main-container">
+    <h1 class="page-title">Reviews for "{{.MovieTitle}}"</h1>
+
+    <div class="reviews-container">
+        {{if .Reviews}}
+        {{range .Reviews}}
+        <div class="review">
+            <div class="review-header">
+                <span class="rating">Rating: {{.Rating}}/5</span>
+            </div>
+            <div class="review-body">
+                <p>{{.Comment}}</p>
+            </div>
+            <div class="review-footer">
+                <small>Reviewed by User ID: {{.UserID}}</small>
+            </div>
+        </div>
+        {{end}}
+        {{else}}
+        <div class="empty-state">
+            <p>No reviews yet. Be the first to write one!</p>
+        </div>
+        {{end}}
+    </div>
+
+    {{if .IsAuthenticated}}
+    <div class="review-form">
+        <h3 class="form-title">Write a Review</h3>
+        <form action="/front/submit-review" method="post">
+            <input type="hidden" name="movie_id" value="{{.MovieID}}">
+
+            <div class="mb-3">
+                <label for="rating" class="form-label">Rating:</label>
+                <select class="form-select" id="rating" name="rating" required>
+                    <option value="" selected disabled>Select rating</option>
+                    <option value="1">1 - Poor</option>
+                    <option value="2">2 - Fair</option>
+                    <option value="3">3 - Good</option>
+                    <option value="4">4 - Very Good</option>
+                    <option value="5">5 - Excellent</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="comment" class="form-label">Your review:</label>
+                <textarea class="form-control" id="comment" name="comment" rows="4" placeholder="Share your thoughts about the movie..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Submit Review</button>
+        </form>
+    </div>
+    {{else}}
+    <div class="login-message">
+        <p>Please <a href="/front/login">log in</a> to write a review.</p>
+    </div>
+    {{end}}
+
+    <div class="nav-link">
+        <a href="/" class="btn btn-outline-light">← Back to Main Page</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
