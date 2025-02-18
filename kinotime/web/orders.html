@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Bookings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .bookings-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .bookings-table th,
+        .bookings-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .bookings-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        .status-pending {
+            background-color: #ffd700;
+            color: #000;
+        }
+        .status-confirmed {
+            background-color: #90EE90;
+            color: #000;
+        }
+        .no-bookings {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Your Bookings</h1>
+
+    {{if .Bookings}}
+    <table class="bookings-table">
+        <thead>
+        <tr>
+            <th>Movie</th>
+            <th>Seats</th>
+            <th>Total Price</th>
+            <th>Status</th>
+            <th>Booking Time</th>
+            <th>Booked On</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{range .Bookings}}
+        <tr>
+            <td>{{.MovieTitle}}</td>
+            <td>{{.SeatsBooked}}</td>
+            <td>${{printf "%.2f" .TotalPrice}}</td>
+            <td>
+                            <span class="status status-{{.Status}}">
+                                {{.Status}}
+                            </span>
+            </td>
+            <td>{{.BookingTime}}</td>
+            <td>{{.CreatedAt.Format "2006-01-02 15:04"}}</td>
+        </tr>
+        {{end}}
+        </tbody>
+    </table>
+    {{else}}
+    <div class="no-bookings">
+        <p>You haven't made any bookings yet.</p>
+    </div>
+    {{end}}
+    <p class="mt-3 text-center">
+        Back To Main Page <a href="/">Main</a>
+    </p>
+</div>
+</body>
+</html>
